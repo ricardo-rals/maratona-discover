@@ -19,24 +19,17 @@ const Modal = {
   }
 }
 
+const Storage = {
+  get() {
+    return JSON.parse(localStorage.getItem("dev.finances:transactions")) || []
+  },
+  set(transactions) {
+    localStorage.setItem("dev.finances:transactions", JSON.stringify(transactions))
+  }
+}
+
 const Transaction = {
-  all: [
-    {
-      description: 'Luz',
-      amount: -50000,
-      date: '25/05/2021',
-    },
-    {
-      description: 'Website',
-      amount: 500000,
-      date: '25/05/2021',
-    },
-    {
-      description: 'Internet',
-      amount: -20000,
-      date: '25/05/2021',
-    }
-  ],
+  all: Storage.get(),
   add(transaction){
     Transaction.all.push(transaction)
     App.reload()
@@ -74,10 +67,12 @@ const DOM = {
   addTransaction(transaction, index) {
     const tr = document.createElement('tr');
     tr.innerHTML = DOM.innerHTMLTransaction(transaction);
+    tr.dataset.index = index;
+
     DOM.transactionsContainer.appendChild(tr)
   },
 
-  innerHTMLTransaction(transaction) {
+  innerHTMLTransaction(transaction, index) {
     const CSSclass = transaction.amount > 0 ? "income" : "expense";
 
     const amount = Utils.formatCurrency(transaction.amount);
@@ -87,7 +82,7 @@ const DOM = {
     <td class="${CSSclass}">${amount}</td>
     <td class="date">${transaction.date}</td>
     <td>
-      <img src="./assets/minus.svg" alt="Remover transação">
+      <img onclick="Transaction.remove(${index})" src="./assets/minus.svg" alt="Remover transação">
     </td>
     `
     return html;
@@ -110,6 +105,16 @@ const DOM = {
 }
 //formatando valores================
 const Utils = {
+  formatDate(date) {
+    const splittedDate = date.split("-")
+
+    return `${splittedDate[2]}/${splittedDate[1]}/${splittedDate[0]}`
+  },
+  formatAmount(value) {
+    value = Number(value) * 100
+
+    return value
+  },
   formatCurrency(value) {
     const signal = Number(value) < 0 ? "-" : "";
     value = String(value).replace(/\D/g, "");
@@ -133,8 +138,17 @@ const Form = {
       date: Form.date.value,
     }
   },
-  formatData() {
+  formatValues() {
+    let { description, amount, date } = Form.getValues()
 
+    amount = Utils.formatAmount(amount)
+    date = Utils.formatDate(date)
+    
+    return {
+      description,
+      amount,
+      date,
+    }
   },
   validadeFields(){
     const { description, amount, date } = Form.getValues()
@@ -146,6 +160,11 @@ const Form = {
           throw new Error("Por favor, preencha todos os campos")
     }
   },
+  clearFields() {
+    Form.description.value = ""
+    Form.amount.value = ""
+    Form.date.value = ""
+  },
   submit(event) {
     
     event.preventDefault();
@@ -154,13 +173,16 @@ const Form = {
       // Verificar se todas as informações foram preenchidas
       Form.validadeFields()
       // formatar os dados para salvar
-      Form.formatData
+      const transaction = Form.formatValues()
       // salvar
+      Transaction.add(transaction)
       // apagar os dados do formulario
+      Form.clearFields()
       // modal feche
+      Modal.close()
       // atualizar a aplicação
     } catch (error) {
-
+      alert(error.message)
     }
     
   }
@@ -168,11 +190,16 @@ const Form = {
 
 const App ={
   init() {
-    Transaction.all.forEach(transaction => {
-      DOM.addTransaction(transaction);
+    /*
+    Transaction.all.forEach((transaction, index) => {
+      DOM.addTransaction(transaction, index);
     });
-    
+    */
+    Transaction.all.forEach(DOM.addTransaction)
+
     DOM.updatedBalance();
+
+    Storage.set(Transaction.all)
     
   },
   reload() {

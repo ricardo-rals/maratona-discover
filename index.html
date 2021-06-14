@@ -28,15 +28,15 @@
           <span>Entregas</span>
           <img src="./assets/income.svg" alt="Imagem de entradas">
         </h3>
-        <p id="incomeDisplay">R$ 5.000,00</p>
+        <p id="incomeDisplay">R$ 0,00</p>
       </div>
 
       <div class="card">
         <h3>
-          <span>Entregas</span>
+          <span>Saídas</span>
           <img src="./assets/expense.svg" alt="Imagem de saida">
         </h3>
-        <p id="expenseDisplay">R$ 2.000,00</p>
+        <p id="expenseDisplay">R$ 0,00</p>
       </div>
 
       <div class="card total">
@@ -44,7 +44,7 @@
           <span>Total</span>
           <img src="./assets/total.svg" alt="Imagem de total">
         </h3>
-        <p id="totalDisplay">R$ 3.000,00</p>
+        <p id="totalDisplay">R$ 0,00</p>
       </div>
     </section>
 
@@ -89,14 +89,14 @@
           <div class="input-group">
             <label 
               class="sr-only" 
-              for="amount">Descrição</label>
+              for="amount">Valor</label>
             <input 
               type="number" 
               id="amount" 
               step="0.01" 
               name="amount" 
-              placeholder="Descrição" />
-              <small>Use o sinal - (negativo) para despesas e , (virgula) para casas decimais</small>
+              placeholder="Valor" />
+              <small class="help">Use o sinal - (negativo) para despesas e , (virgula) para casas decimais</small>
           </div>
           <div class="input-group">
             <label 
